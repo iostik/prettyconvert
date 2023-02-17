@@ -1,0 +1,10 @@
+.vscode/
+**/__pycache__/
+# libs/ffmpeg.exe
+# libs/ffprobe.exe
+
+!example_batсh_for_menu.bat
+!example_pics.bat
+!example_vids.bat
+
+**.bat
