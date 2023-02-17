@@ -3,8 +3,8 @@
 # libs/ffmpeg.exe
 # libs/ffprobe.exe
 
+**.bat
+
 !example_batсh_for_menu.bat
 !example_pics.bat
 !example_vids.bat
-
-**.bat
