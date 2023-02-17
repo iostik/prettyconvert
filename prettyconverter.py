@@ -16,6 +16,7 @@ progressinfo = re.compile('time=(.*?)\s.*speed=(.*?x)', re.M)
 _output = os.getenv("_output")
 _params = os.getenv("_params")
 _delorig = str(os.getenv("delorig"))
+_scriptpath = os.path.dirname(os.path.abspath(__file__))
 try:
     _formats = [el.replace(" ", "") for el in os.getenv("_formats").split(",")]
 except:
@@ -88,7 +89,7 @@ def get_sec(time_str):
         return f'{str(h).zfill(2)}:{str(m).zfill(2)}:{str(int(s)).zfill(2)}.{int(s%1*100)}'
 
 def getduration(file):
-    duration = subprocess.check_output(['libs/ffprobe.exe', '-i', file, '-show_entries', 'format=duration', '-v', 'quiet', '-of', 'csv=%s' % ("p=0")]).decode("utf-8")
+    duration = subprocess.check_output([f'{_scriptpath}/libs/ffprobe.exe', '-i', file, '-show_entries', 'format=duration', '-v', 'quiet', '-of', 'csv=%s' % ("p=0")]).decode("utf-8")
     return math.ceil(float(duration)*100)/100
 
 def setOutputName(name, outputformat):
@@ -101,7 +102,7 @@ def setOutputName(name, outputformat):
 
 def convertvideo(_input, _params, _output):
     clearname, ext = os.path.splitext(os.path.normpath(_input))
-    cmd = f'libs/ffmpeg.exe -y -hide_banner -i "{_input}" {_params} "{setOutputName(clearname, _output)}"'
+    cmd = f'{_scriptpath}/libs/ffmpeg.exe -y -hide_banner -i "{_input}" {_params} "{setOutputName(clearname, _output)}"'
     _duration = getduration(_input)
     try:
         process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,universal_newlines=True)
@@ -119,7 +120,7 @@ def convertvideo(_input, _params, _output):
 
 def convertpic(_input, _params, _output="jpeg"):
     clearname, ext = os.path.splitext(os.path.normpath(_input))
-    cmd = f'libs/nconvert.exe -out {formatfix(_output)} -o "{setOutputName(clearname, _output)}" {_params} "{_input}"'
+    cmd = f'"{_scriptpath}/libs/nconvert.exe" -out {formatfix(_output)} -o "{setOutputName(clearname, _output)}" {_params} "{_input}"'
     try:
         process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,universal_newlines=True)
         for line in process.stdout:
@@ -187,7 +188,6 @@ def run():
             createResult(completed, failed)
 
     elif _output in allpic:
-        print('картинка')
         equeuepic = createqueue(_folder, template=_formats)
         todel = []
         completed = []
