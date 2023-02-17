@@ -1,6 +1,6 @@
 @Echo off
-echo folder:
-set /p _folder=
+set _folder=%1
+echo %_folder%
 
 ::Путь к скрипту
 set pyscript=%~dp0\prettyconverter.py
