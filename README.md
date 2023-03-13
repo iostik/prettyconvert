@@ -7,8 +7,10 @@
 
 Для создания подменю в контекстном меню:
 1. регистрируем пункты в HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\CommandStore\shell\ так же как описано выше, только в этом разделе
-2. Создаём папку в HKEY_CLASSES_ROOT\Directory\shell со следующими разделами:
+2. Создаём папку в HKEY_CLASSES_ROOT\Directory\shell со следующими параметрами:
     "MUIVerb" - в значении поумолчанию пишем имя выпадающего меню
     "SubCommands" - перечисляем зарегистрированные пункты через точку с запятой
+    
+![Alt text](https://i.imgur.com/vEkKVLH.png "Optional title")    
 
 При использовании батника обычным способом - либо ввод пути к папке или файлу, либо перетаскивание файла или папки в консоль
