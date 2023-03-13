@@ -44,7 +44,7 @@ def clearlaststr(descr=None,lines=1):
         sys.stdout.write('\x1b[1A')
         sys.stdout.write('\x1b[2K')
     if descr:
-        print(descr)
+        print(cutdescr(descr))
 def progress(current, range, descr=""):
     clearlaststr()
     print(f'[{math.floor(float(current)/float(range)*100)}%] {cutdescr(descr)}')
