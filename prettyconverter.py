@@ -147,6 +147,7 @@ Failed: {len(failed)}""")
 def run():
     if _output in allext:
         typeconv = 'folder'
+        equeue = []
         if os.path.isdir(_folder):
             equeue = createqueue(_folder, template=_formats)
         elif os.path.isfile(_folder):
