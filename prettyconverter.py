@@ -75,8 +75,13 @@ def createqueue(folder, template):
     return queue
 
 def delfiles(_list):
+    _except = []
     for file in _list:
-        os.remove(file)
+        try:
+            os.remove(file)
+        except:
+            _except.append(file)
+    return _except
 
 def get_sec(time_str):
     """Get seconds from time."""
@@ -175,7 +180,7 @@ def run():
             if _delorig == "True":
                 print("Удаляю оригинальные файлы")
                 time.sleep(1)
-                delfiles(completed)
+                _except = delfiles(completed)
                 print("Переименовываю новые")
                 time.sleep(1)
                 torename = []
@@ -185,7 +190,11 @@ def run():
                     torename = [os.path.normpath(f'{os.path.splitext(_folder)[0]}{_placeholder}.{_output}')]
                 for file in torename:
                     if f"{_placeholder}.{_output}" in file:
-                        os.rename(file, file.replace(f"{_placeholder}.","."))
+                        if file.replace(_placeholder,'') in _except:
+                            failed.append(file)
+                        else:
+                            os.rename(file, file.replace(f"{_placeholder}.","."))
+
             
             createResult(completed, failed)
 
@@ -213,16 +222,18 @@ def run():
             if _delorig == "True":
                 print("Удаляю оригинальные файлы")
                 time.sleep(1)
-                delfiles(equeuepic)
+                _except = delfiles(equeuepic)
                 print("Переименовываю временные файлы")
                 time.sleep(1)
                 torename = createqueue(_folder, template=[_output])
                 for file in torename:
-                    os.rename(file, file.replace(f"{_placeholder}.","."))
+                    if file.replace(_placeholder,'') in _except:
+                        failed.append(file)
+                    else:
+                        os.rename(file, file.replace(f"{_placeholder}.","."))
                 clearlaststr(descr=f'Картинки готовы!')
             
             createResult(completed, failed)
-
 
 if __name__ == "__main__":
     run()
