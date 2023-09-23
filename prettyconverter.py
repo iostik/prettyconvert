@@ -238,10 +238,6 @@ def run():
                     torename = createqueue(_folder, template=[_output])
                 elif typeconv == 'file':
                     torename = [os.path.normpath(f'{os.path.splitext(_folder)[0]}{_placeholder}.{_output}')]
-                print("-------------------------------------")
-                print(torename)
-                print("-------------------------------------")
-                print("-------------------------------------")
                 for file in torename:
                     if file.replace(_placeholder,'') in _except:
                         failed.append(file)
