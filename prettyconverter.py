@@ -157,6 +157,8 @@ def run():
         if os.path.isdir(_folder):
             equeue = createqueue(_folder, template=_formats)
         elif os.path.isfile(_folder):
+            if os.path.splitext(_folder)[1][1:] not in allext:
+                return
             typeconv = 'file'
             equeue = [_folder]
         todel = []
@@ -199,7 +201,13 @@ def run():
             createResult(completed, failed)
 
     elif _output in allpic:
-        equeuepic = createqueue(_folder, template=_formats)
+        if os.path.isdir(_folder):
+            equeuepic = createqueue(_folder, template=_formats)
+        elif os.path.isfile(_folder):
+            if os.path.splitext(_folder)[1][1:] not in allpic:
+                return
+            typeconv = 'file'
+            equeuepic = [_folder]
         todel = []
         completed = []
         failed = []
@@ -225,7 +233,15 @@ def run():
                 _except = delfiles(equeuepic)
                 print("Переименовываю временные файлы")
                 time.sleep(1)
-                torename = createqueue(_folder, template=[_output])
+                torename = []
+                if typeconv == 'folder':
+                    torename = createqueue(_folder, template=[_output])
+                elif typeconv == 'file':
+                    torename = [os.path.normpath(f'{os.path.splitext(_folder)[0]}{_placeholder}.{_output}')]
+                print("-------------------------------------")
+                print(torename)
+                print("-------------------------------------")
+                print("-------------------------------------")
                 for file in torename:
                     if file.replace(_placeholder,'') in _except:
                         failed.append(file)
