@@ -1,6 +1,11 @@
 @Echo off
-echo folder or file:
-set /p _folder=
+set _folder=
+:loop
+if (%1)==() goto cont
+set _folder=%_folder% %1;
+shift
+goto loop
+:cont
 
 ::Путь к скрипту
 set pyscript=%~dp0\prettyconverter.py
