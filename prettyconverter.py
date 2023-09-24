@@ -6,7 +6,7 @@ import time
 import re
 import math
 import datetime
-from modules.ext_list import EXT_VID, EXT_PIC
+from modules.ext_list import EXT_VID, EXT_PIC, formatfix
 os.system("")
 
 _placeholder = "--_temp"
@@ -50,12 +50,6 @@ def clearlaststr(descr=None,lines=1):
 def progress(current, range, descr=""):
     clearlaststr()
     print(f'[{math.floor(float(current)/float(range)*100)}%] {cutdescr(descr)}')
-
-def formatfix(ext):
-    exts = {
-        "jpg": "jpeg",
-    }
-    return exts[ext] if ext in exts else ext
 
 def getext(name,formats=[]):
     try:
