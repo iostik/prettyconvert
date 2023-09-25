@@ -1,7 +1,6 @@
 from subprocess import call
 import subprocess
 import os
-import sys
 import time
 import re
 import math
@@ -29,23 +28,19 @@ def clearpath(path=""):
     r = r.replace('"','')
     return os.path.normpath(r)
 
-if os.getenv("_folder"):
-    _folder= clearpath(os.getenv("_folder"))
-else:
-    _folder= ""
+_folder= clearpath(os.getenv("_folder")) if os.getenv("_folder") else ""
 
 ##############################
 
-def getext(name,formats=[]):
+def getext(name:str,formats:list) -> (str|None):
+    """Получаем расширение файла"""
     try:
         return [ext for ext in formats if name.lower().endswith(f'.{ext}')][0]
     except:
         return None
-    
-def getrem(name):
-    return name if f'{_placeholder}.' in name else None
-    
-def parse_folder(folder, template):
+
+def parse_folder(folder:str, template:str) -> list:
+    """Перебор файлов в подпапках"""
     queue = []
     for root, dirs, files in os.walk(os.path.normpath(folder)):
         for file in files:
@@ -53,8 +48,9 @@ def parse_folder(folder, template):
                 queue.append(os.path.join(root, file))
     return queue
 
-def createqueue(str, template):
-    queue = [i.strip() for i in str.split(";")]
+def createqueue(string:str, template:str) -> list:
+    """Создание очереди всех выделенныъ файлов"""
+    queue = [i.strip() for i in string.split(";")]
     ret_queue = []
     for item in queue:
         if os.path.isfile(item):
@@ -64,7 +60,8 @@ def createqueue(str, template):
             ret_queue+=parse_folder(item, template=_formats)
     return ret_queue
 
-def delfiles(_list):
+def delfiles(_list:list) -> list:
+    """Удаление файлов"""
     _except = []
     for file in _list:
         try:
@@ -73,8 +70,8 @@ def delfiles(_list):
             _except.append(file)
     return _except
 
-def get_sec(time_str):
-    """Get seconds from time."""
+def get_sec(time_str:str) -> str:
+    """Get seconds from time"""
     if type(time_str) is str:
         h, m, s = time_str.split(':')
         return int(h) * 3600 + int(m) * 60 + round(float(s),2)
@@ -83,12 +80,16 @@ def get_sec(time_str):
         m=int((time_str%3600)//60)
         s=math.ceil((time_str%3600)%60*100)/100
         return f'{str(h).zfill(2)}:{str(m).zfill(2)}:{str(int(s)).zfill(2)}.{int(s%1*100)}'
+    else:
+        return ""
 
-def getduration(file):
+def getduration(file:str) -> str:
+    """Получаем продолжительность видео из ffprobe"""
     duration = subprocess.check_output([f'{_scriptpath}/libs/ffprobe.exe', '-i', file, '-show_entries', 'format=duration', '-v', 'quiet', '-of', 'csv=%s' % ("p=0")]).decode("utf-8")
     return math.ceil(float(duration)*100)/100
 
-def setOutputName(name, outputformat):
+def set_output_name(name:str, outputformat:str) -> str:
+    """Форматирование имена файла с плейсхолдером и в нужный формат"""
     if not os.path.isfile(f'{name}{_placeholder}.{outputformat}'):
         return f'{name}{_placeholder}.{outputformat}'
     else:
@@ -96,9 +97,10 @@ def setOutputName(name, outputformat):
             if not os.path.isfile(f'{name}_{str(i)}{_placeholder}.{outputformat}'):
                 return f'{name}_{str(i)}{_placeholder}.{outputformat}'
 
-def convertvideo(_input, _params, _output):
+def convert_video(_input:str, _params:str, _output:str):
+    """Конвертация видео через ффмпег"""
     clearname, ext = os.path.splitext(os.path.normpath(_input))
-    cmd = f'{_scriptpath}/libs/ffmpeg.exe -y -hide_banner -i "{_input}" {_params} "{setOutputName(clearname, _output)}"'
+    cmd = f'{_scriptpath}/libs/ffmpeg.exe -y -hide_banner -i "{_input}" {_params} "{set_output_name(clearname, _output)}"'
     _duration = getduration(_input)
     try:
         process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,universal_newlines=True)
@@ -113,9 +115,10 @@ def convertvideo(_input, _params, _output):
     except OSError:
         pass
 
-def convertpic(_input, _params, _output="jpeg"):
+def convertpic(_input:str, _params:str, _output:str="jpeg"):
+    """Конвертация видео через нконверт"""
     clearname, ext = os.path.splitext(os.path.normpath(_input))
-    cmd = f'"{_scriptpath}/libs/nconvert.exe" -out {formatfix(_output)} -o "{setOutputName(clearname, _output)}" {_params} "{_input}"'
+    cmd = f'"{_scriptpath}/libs/nconvert.exe" -out {formatfix(_output)} -o "{set_output_name(clearname, _output)}" {_params} "{_input}"'
     try:
         process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,universal_newlines=True)
         for line in process.stdout:
@@ -126,7 +129,8 @@ def convertpic(_input, _params, _output="jpeg"):
     except OSError:
         pass
 
-def createResult(completed=[], failed=[]):
+def create_result(completed:list, failed:list) -> None:
+    """Создание отчёта"""
     print(f"""
 Completed: {len(completed)}
 Failed: {len(failed)}""")
@@ -138,22 +142,24 @@ Failed: {len(failed)}""")
                 outfile.write(f"{item}\n")
     print("\n\n")
 
-def add_size(file, stage="old"):
+def add_size(file:str, stage:str="old") -> str:
+    """возвращение размера файла"""
     if stage=="old":
         return os.path.getsize(file)
     if stage=="new":
         return os.path.getsize(os.path.normpath(f'{os.path.splitext(file)[0]}{_placeholder}.{_output}'))
-    
-def format_size(size_bytes=0):
+
+def format_size(size_bytes:int=0) -> str:
+    """форматирование размера"""
     if size_bytes == 0:
-       return "0B"
+        return "0B"
     size_name = ("B", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB")
     i = int(math.floor(math.log(size_bytes, 1024)))
     p = math.pow(1024, i)
     s = round(size_bytes / p, 2)
     return "%s%s" % (s, size_name[i])
 
-def run():
+def run() -> None:
     equeue = createqueue(_folder, template=_formats)
     todel = []
     completed = []
@@ -169,7 +175,7 @@ def run():
             sp.add_progress(num+1, len(equeue), descr=f'{os.path.basename(file)}')
             sp.add_line()
             old_size += os.path.getsize(file)
-            current = convertvideo(file, _params=_params, _output=_output)
+            current = convert_video(file, _params=_params, _output=_output)
             if current != None:
                 todel.append(current)
                 failed.append(file)
@@ -191,7 +197,7 @@ def run():
                 completed.append(file)
                 old_size += add_size(file, stage="old")
                 new_size += add_size(file, stage="new")
-        
+
     if len(todel)>0 or len(failed)>0 or len(completed)>0:
         sp.clear_line()
         sp.paste_string(f'[{len(completed)}/{len(equeue)}] {type_file} переконвертированы!')
@@ -215,8 +221,8 @@ def run():
                 else:
                     os.rename(file, file.replace(f"{_placeholder}.","."))
             print(f'{type_file} готовы!')
-        
-        createResult(completed, failed)
+
+        create_result(completed, failed)
 
 
 if __name__ == "__main__":
