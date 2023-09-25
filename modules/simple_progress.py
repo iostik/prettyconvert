@@ -55,7 +55,9 @@ def clear_line():
 
 def paste_string(string=""):
     """вставляем строку"""
+    clear_line()
     sys.stdout.write(string+(PROGRESS_PLACEHOLDER * (PROGRESS_STRING_LIM-len(string)+1)))
+    sys.stdout.write("\r")
     sys.stdout.flush()
 
 def add_line(string=""):

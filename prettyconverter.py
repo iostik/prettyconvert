@@ -108,7 +108,7 @@ def convertvideo(_input, _params, _output):
                 return f"{clearname}{_placeholder}.{_output}"
             elif progressinfo.search(line):
                 _time, _speed = progressinfo.search(line).groups()
-                sp.add_progress(get_sec(_time), _duration, descr=f'completed time: [{_time}/{get_sec(_duration)}] speed: [{_speed}]')
+                sp.paste_string(f'completed time: [{_time}/{get_sec(_duration)}] speed: [{_speed}]')
         return None
     except OSError:
         pass
