@@ -7,6 +7,7 @@ import re
 import math
 import datetime
 from modules.ext_list import EXT_VID, EXT_PIC, formatfix
+import modules.simple_progress as sp
 os.system("")
 
 _placeholder = "--_temp"
@@ -34,22 +35,6 @@ else:
     _folder= ""
 
 ##############################
-
-def cutdescr(string):
-    tsize = os.get_terminal_size().columns-25
-    offs = int(tsize/2)
-    return f'{string[0:offs]}...{string[offs*-1:]}' if len(string)>tsize else string    
-
-def clearlaststr(descr=None,lines=1):
-    for i in range(lines):
-        sys.stdout.write('\x1b[1A')
-        sys.stdout.write('\x1b[2K')
-    if descr:
-        print(cutdescr(descr))
-
-def progress(current, range, descr=""):
-    clearlaststr()
-    print(f'[{math.floor(float(current)/float(range)*100)}%] {cutdescr(descr)}')
 
 def getext(name,formats=[]):
     try:
@@ -123,8 +108,7 @@ def convertvideo(_input, _params, _output):
                 return f"{clearname}{_placeholder}.{_output}"
             elif progressinfo.search(line):
                 _time, _speed = progressinfo.search(line).groups()
-                progress(get_sec(_time), _duration, descr=f'completed time: [{_time}/{get_sec(_duration)}] speed: [{_speed}]')
-                # print(line)
+                sp.add_progress(get_sec(_time), _duration, descr=f'completed time: [{_time}/{get_sec(_duration)}] speed: [{_speed}]')
         return None
     except OSError:
         pass
@@ -154,47 +138,71 @@ Failed: {len(failed)}""")
                 outfile.write(f"{item}\n")
     print("\n\n")
 
+def add_size(file, stage="old"):
+    if stage=="old":
+        return os.path.getsize(file)
+    if stage=="new":
+        return os.path.getsize(os.path.normpath(f'{os.path.splitext(file)[0]}{_placeholder}.{_output}'))
+    
+def format_size(size_bytes=0):
+    if size_bytes == 0:
+       return "0B"
+    size_name = ("B", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB")
+    i = int(math.floor(math.log(size_bytes, 1024)))
+    p = math.pow(1024, i)
+    s = round(size_bytes / p, 2)
+    return "%s%s" % (s, size_name[i])
 
 def run():
     equeue = createqueue(_folder, template=_formats)
     todel = []
     completed = []
     failed = []
+    old_size = 0
+    new_size = 0
 
     type_file = ""
 
     if _output in EXT_VID:
         type_file = "видео"
         for num, file in enumerate(equeue):
-            print(f'[{num+1}/{len(equeue)}] {os.path.basename((file))}\n')
+            sp.add_progress(num+1, len(equeue), descr=f'{os.path.basename(file)}')
+            sp.add_line()
+            old_size += os.path.getsize(file)
             current = convertvideo(file, _params=_params, _output=_output)
             if current != None:
                 todel.append(current)
                 failed.append(file)
             else:
                 completed.append(file)
-            clearlaststr(lines=2)
+                old_size += add_size(file, stage="old")
+                new_size += add_size(file, stage="new")
+            sp.del_line(2)
 
     elif _output in EXT_PIC:
         type_file = "картинки"
         for num, file in enumerate(equeue):
-            progress(num, len(equeue), descr=f'[{num}/{len(equeue)}] {os.path.basename(file)}')
+            sp.add_progress(num, len(equeue), descr=f'{os.path.basename(file)}')
             current = convertpic(file, _params=_params, _output=_output)
             if current != None:
                 todel.append(current)
                 failed.append(file)
             else:
                 completed.append(file)
+                old_size += add_size(file, stage="old")
+                new_size += add_size(file, stage="new")
         
     if len(todel)>0 or len(failed)>0 or len(completed)>0:
-        clearlaststr(descr=f'[100%] Все {type_file} переконвертированы!')
+        sp.clear_line()
+        sp.paste_string(f'[{len(completed)}/{len(equeue)}] {type_file} переконвертированы!')
+        sp.add_line(f'{format_size(old_size)} -> {format_size(new_size)}')
 
         if len(todel)>0:
             time.sleep(2)
             delfiles(todel)
 
         if _delorig == "True":
-            print("Удаляю оригинальные файлы")
+            print("\n\nУдаляю оригинальные файлы")
             time.sleep(1)
             _except = delfiles(equeue)
             print("Переименовываю временные файлы")
@@ -206,7 +214,7 @@ def run():
                     failed.append(file)
                 else:
                     os.rename(file, file.replace(f"{_placeholder}.","."))
-            clearlaststr(descr=f'{type_file} готовы!')
+            print(f'{type_file} готовы!')
         
         createResult(completed, failed)
 
