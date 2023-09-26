@@ -1,5 +1,6 @@
 from subprocess import call
 import subprocess
+from pprint import pprint
 import os
 import time
 import re
@@ -28,9 +29,19 @@ def clearpath(path=""):
     r = r.replace('"','')
     return os.path.normpath(r)
 
-_folder= clearpath(os.getenv("_folder")) if os.getenv("_folder") else ""
+_folder = clearpath(os.getenv("_folder")) if os.getenv("_folder") else ""
 
 ##############################
+
+def get_main_path(files:list) -> str:
+    """возвращает верхнюю директорию при пакетном добавлении"""
+    output=""
+    for file in files:
+        if output == "":
+            output=os.path.split(file)[0]
+        elif output>os.path.split(file)[0]:
+            output=os.path.split(file)[0]
+    return output
 
 def getext(name:str,formats:list) -> (str|None):
     """Получаем расширение файла"""
@@ -161,6 +172,7 @@ def format_size(size_bytes:int=0) -> str:
 
 def run() -> None:
     equeue = createqueue(_folder, template=_formats)
+    main_path = get_main_path(equeue)
     todel = []
     completed = []
     failed = []
@@ -188,7 +200,7 @@ def run() -> None:
     elif _output in EXT_PIC:
         type_file = "картинки"
         for num, file in enumerate(equeue):
-            sp.add_progress(num, len(equeue), descr=f'{os.path.basename(file)}')
+            sp.add_progress(num, len(equeue), descr=os.path.abspath(os.path.abspath(file)).replace(main_path,"").replace("\\","/"))
             current = convertpic(file, _params=_params, _output=_output)
             if current != None:
                 todel.append(current)
