@@ -117,8 +117,7 @@ def convert_video(_input:str, _params:str, _output:str):
         process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,universal_newlines=True)
         for line in process.stdout:
             if "error" in line.lower():
-                print(f"ошибка в файле {_input} : {line}\n\n\n")
-                return f"{clearname}{_placeholder}.{_output}"
+                return (f"error in {_input}:\n{line}", f"{clearname}{_placeholder}.{_output}")
             elif progressinfo.search(line):
                 _time, _speed = progressinfo.search(line).groups()
                 sp.paste_string(f'completed time: [{_time}/{get_sec(_duration)}] speed: [{_speed}]')
@@ -134,13 +133,12 @@ def convertpic(_input:str, _params:str, _output:str="jpeg"):
         process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,universal_newlines=True)
         for line in process.stdout:
             if "error" in line.lower():
-                print(line+"\n\n\n")
-                return f"{clearname}{_placeholder}.{_output}"
+                return (f"error in {_input}:\n{line}", f"{clearname}{_placeholder}.{_output}")
         return None
     except OSError:
         pass
 
-def create_result(completed:list, failed:list) -> None:
+def create_result(completed:list, failed:list, errors:list) -> None:
     """Создание отчёта"""
     print(f"""
 Completed: {len(completed)}
@@ -150,6 +148,9 @@ Failed: {len(failed)}""")
         homeDir = os.path.expanduser('~')
         with open(os.path.join(homeDir,'Desktop',f'failed_files_{datetime.datetime.now().strftime("%H-%M-%S")}.txt'), 'w') as outfile:
             for item in failed:
+                outfile.write(f"{item}\n")
+            outfile.write(f"\n\nОшибки:\n\n")
+            for item in errors:
                 outfile.write(f"{item}\n")
     print("\n\n")
 
@@ -176,6 +177,7 @@ def run() -> None:
     todel = []
     completed = []
     failed = []
+    errors = []
     old_size = 0
     new_size = 0
 
@@ -188,8 +190,10 @@ def run() -> None:
             sp.add_line()
             old_size += os.path.getsize(file)
             current = convert_video(file, _params=_params, _output=_output)
-            if current != None:
-                todel.append(current)
+            if current is not None:
+                fail_line, file_del = current
+                todel.append(file_del)
+                errors.append(fail_line)
                 failed.append(file)
             else:
                 completed.append(file)
@@ -202,8 +206,10 @@ def run() -> None:
         for num, file in enumerate(equeue):
             sp.add_progress(num, len(equeue), descr=os.path.abspath(os.path.abspath(file)).replace(main_path,"").replace("\\","/"))
             current = convertpic(file, _params=_params, _output=_output)
-            if current != None:
-                todel.append(current)
+            if current is not None:
+                fail_line, file_del = current
+                todel.append(file_del)
+                errors.append(fail_line)
                 failed.append(file)
             else:
                 completed.append(file)
@@ -234,7 +240,7 @@ def run() -> None:
                     os.rename(file, file.replace(f"{_placeholder}.","."))
             print(f'{type_file} готовы!')
 
-        create_result(completed, failed)
+        create_result(completed, failed, errors)
 
 
 if __name__ == "__main__":
