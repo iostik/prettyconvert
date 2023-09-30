@@ -222,7 +222,7 @@ def run() -> None:
         if _delorig == "True":
             print("\n\nУдаляю оригинальные файлы")
             time.sleep(1)
-            _except = delfiles(equeue)
+            _except = delfiles(completed)
             print("Переименовываю временные файлы")
             time.sleep(1)
             torename = []
