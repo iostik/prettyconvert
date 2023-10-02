@@ -40,8 +40,9 @@ def del_line(lines=1):
         # sys.stdout.write('\x1b[1A')
         print ("\033[A"+(" "* PROGRESS_STRING_LIM)+"\033[A")
         clear_line()
+        sys.stdout.write("\r")
         # sys.stdout.flush()
-    sys.stdout.write('\x1b[1A')
+    # sys.stdout.write('\x1b[1A')
     sys.stdout.write("\r")
     # sys.stdout.flush()
 
