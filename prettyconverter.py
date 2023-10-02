@@ -199,7 +199,7 @@ def run() -> None:
                 completed.append(file)
                 old_size += add_size(file, stage="old")
                 new_size += add_size(file, stage="new")
-            sp.del_line(2)
+            sp.del_line(1)
 
     elif _output in EXT_PIC:
         type_file = "картинки"
