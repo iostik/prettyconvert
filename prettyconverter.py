@@ -35,13 +35,15 @@ _folder = clearpath(os.getenv("_folder")) if os.getenv("_folder") else ""
 
 def get_main_path(files:list) -> str:
     """возвращает верхнюю директорию при пакетном добавлении"""
-    output=""
-    for file in files:
-        if output == "":
-            output=os.path.split(file)[0]
-        elif output>os.path.split(file)[0]:
-            output=os.path.split(file)[0]
-    return output
+    minpath = ''
+    for it in files:
+        tmp = os.path.split(it)[0]
+        if minpath=='':
+            minpath = tmp
+            continue
+        if tmp<minpath:
+            minpath = tmp
+    return minpath+'\\'
 
 def getext(name:str,formats:list) -> (str|None):
     """Получаем расширение файла"""
