@@ -114,7 +114,7 @@ def convert_video(_input:str, _params:str, _output:str):
     cmd = f'{_scriptpath}/libs/ffmpeg.exe -y -hide_banner -i "{_input}" {_params} "{set_output_name(clearname, _output)}"'
     _duration = getduration(_input)
     try:
-        process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,universal_newlines=True)
+        process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,universal_newlines=True, encoding="utf-8")
         for line in process.stdout:
             if "error" in line.lower():
                 return (f"error in {_input}:\n{line}", f"{clearname}{_placeholder}.{_output}")
@@ -130,7 +130,7 @@ def convertpic(_input:str, _params:str, _output:str="jpeg"):
     clearname, ext = os.path.splitext(os.path.normpath(_input))
     cmd = f'"{_scriptpath}/libs/nconvert.exe" -out {formatfix(_output)} -o "{set_output_name(clearname, _output)}" {_params} "{_input}"'
     try:
-        process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,universal_newlines=True)
+        process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,universal_newlines=True, encoding="utf-8")
         for line in process.stdout:
             if "error" in line.lower():
                 return (f"error in {_input}:\n{line}", f"{clearname}{_placeholder}.{_output}")
