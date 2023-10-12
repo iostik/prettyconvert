@@ -36,14 +36,25 @@ _folder = clearpath(os.getenv("_folder")) if os.getenv("_folder") else ""
 def get_main_path(files:list) -> str:
     """возвращает верхнюю директорию при пакетном добавлении"""
     minpath = ''
+    _min=0
+    _max=0
     for it in files:
-        tmp = os.path.split(it)[0]
+        tmp = os.path.dirname(it)
         if minpath=='':
             minpath = tmp
+            _min=len(tmp.split('\\'))
+            _max=len(tmp.split('\\'))
             continue
-        if tmp<minpath:
+        if len(tmp.split('\\'))<_min:
             minpath = tmp
-    return minpath+'\\'
+            _min = len(tmp.split('\\'))
+        if len(tmp.split('\\'))>_max:
+            _max = len(tmp.split('\\'))
+
+    if _min==_max:
+        return os.path.dirname(minpath)+'\\'
+    else:
+        return minpath+'\\'
 
 def getext(name:str,formats:list) -> (str|None):
     """Получаем расширение файла"""
@@ -206,7 +217,7 @@ def run() -> None:
     elif _output in EXT_PIC:
         type_file = "картинки"
         for num, file in enumerate(equeue):
-            sp.add_progress(num, len(equeue), descr=os.path.abspath(os.path.abspath(file)).replace(main_path,"").replace("\\","/"))
+            sp.add_progress(num, len(equeue), descr=os.path.abspath(file).replace(main_path,"").replace("\\","/"))
             current = convertpic(file, _params=_params, _output=_output)
             if current is not None:
                 fail_line, file_del = current
