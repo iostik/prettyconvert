@@ -201,7 +201,6 @@ def run() -> None:
         for num, file in enumerate(equeue):
             sp.add_progress(num+1, len(equeue), descr=f'{os.path.basename(file)}')
             sp.add_line()
-            old_size += os.path.getsize(file)
             current = convert_video(file, _params=_params, _output=_output)
             if current is not None:
                 fail_line, file_del = current
