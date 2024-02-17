@@ -13,7 +13,7 @@ os.system("")
 _placeholder = "--_temp"
 
 ############### забираем параметры из батника
-progressinfo = re.compile('time=(.*?)\s.*speed=(.*?x)', re.M)
+progressinfo = re.compile('time=(.*?)\\s.*speed=(.*?x)', re.M)
 _output = os.getenv("_output")
 _params = os.getenv("_params")
 _delorig = str(os.getenv("delorig"))
